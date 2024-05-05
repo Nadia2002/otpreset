@@ -25,6 +25,31 @@ router.post('/signup', async (req, res) => {
       res.status(500).send('Error signing up');
   }
 });
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    // Compare the provided password with the hashed password in the database
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(401).send('Invalid password');
+    }
+
+    // Password is correct, user is authenticated
+    res.status(200).send('Login successful');
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).send('Error logging in');
+  }
+});
 
 // Route for sending OTP for password reset
 router.post('/forgot-password', async (req, res) => {
