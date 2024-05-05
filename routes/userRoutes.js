@@ -3,27 +3,7 @@ const router = express.Router();
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
-const { sendOTPForPasswordReset } = require('../utils/passwordReset');
 
-router.post('/signup', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).send('User with this email already exists');
-    }
-
-    const newUser = new User({ email, password });
-    await newUser.save();
-
-    res.status(201).send('User registered successfully');
-  } catch (error) {
-    console.error('Error signing up:', error);
-    res.status(500).send('Error signing up');
-  }
-});
 
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
@@ -74,29 +54,6 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
 
-  try {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).send('User not found');
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
-
-    if (!passwordMatch) {
-      console.error('Invalid password input:', password);
-      console.error('Hashed password from database:', user.password);
-      return res.status(401).send('Invalid email or password');
-    }
-
-    res.status(200).send('Login successful');
-  } catch (error) {
-    console.error('Error logging in:', error);
-    res.status(500).send('Error logging in');
-  }
-});
 
 module.exports = router;
